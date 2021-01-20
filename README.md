@@ -57,7 +57,6 @@ optional arguments:
 
 In order to use this tool you need:
 * A Google account in the DIVD organisation
-* Authorisatiion:
-  - Either mail f.breedijk@divd.nl to add you to the whitelis
-  - Or create credentials.json yourself using this page: https://developers.google.com/drive/api/v3/quickstart/python (make sure you are logged into you divd.nl account)
+* Create credentials.json using this page: https://developers.google.com/drive/api/v3/quickstart/python (make sure you are logged into you divd.nl account)
+* Alternatively, ask Frank from credentials and a whitlisting
 * Certain packages (a lot if you want gifs as well), see prep-ubuntu.sh to give you an idea
