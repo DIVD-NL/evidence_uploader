@@ -393,7 +393,7 @@ if __name__ == '__main__':
 
     if upload or scan:
         #Building target list
-        if args.targets:
+        if "targets" in args and args.targets:
             targetf = open(args.targets, 'r')
             targets=targetf.readlines()
             targetf.close
@@ -402,17 +402,17 @@ if __name__ == '__main__':
             targets=glob.glob(args.glob)
             print("{} files found".format(len(targets)))
 
-    # Scan and/or upload each target
-    for target in targets:
-        target = target.strip()
+        # Scan and/or upload each target
+        for target in targets:
+            target = target.strip()
 
-        if scan:
-            timestamp = scan_target(target, args.scanner, args.argument)
-        else:
-            timestamp=None
+            if scan:
+                timestamp = scan_target(target, args.scanner, args.argument)
+            else:
+                timestamp=None
 
-        if upload:
-            upload_evidence(services,target_folder,sheet_id,target,timestamp,args.regex)
+            if upload:
+                upload_evidence(services,target_folder,sheet_id,target,timestamp,args.regex)
 
     if upload:
         done(services)
