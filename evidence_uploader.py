@@ -359,7 +359,7 @@ if __name__ == '__main__':
             parser.print_help()
             sys.exit("\nevidence_uploader.py: error: Case number '{}'' is not a valid case number, sytax is YYYY-NNNNN".format(args.case))
 
-    if args.targets:
+    if "targets" in args and args.targets:
         if not file_exists(args.targets):
             sys.exit("\nevidence_uploader.py: error: The file with scan targets '{}' does not exist".format(args.targets))
 
