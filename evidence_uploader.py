@@ -6,7 +6,6 @@ import os.path
 import argparse
 import sys
 import re
-import glob
 import subprocess
 import mimetypes
 import time
@@ -15,8 +14,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from apiclient.http import MediaFileUpload
 
-
-CASES_DRIVE = '0ACCGddKO5jW2Uk9PVA'
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = [
@@ -30,6 +27,7 @@ def login():
     """Shows basic usage of the Drive v3 API.
     Prints the names and ids of the first 10 files the user has access to.
     """
+    print("AUthorizing to Google services.")
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -45,7 +43,7 @@ def login():
             flow = InstalledAppFlow.from_client_secrets_file(
                 'credentials.json', SCOPES)
             if "no_browser" in args and args.no_browser:
-                print("Authorizing without browser")
+                print("Authorizing without local browser and server")
                 creds = flow.run_console()    
             else:
                 print("Authorizing with local browser and server")
@@ -54,6 +52,7 @@ def login():
         with open(args.pickle, 'wb') as token:
             pickle.dump(creds, token)
 
+    print("Authorization complete.")
     drive  = build('drive', 'v3', credentials=creds)
     sheets = build('sheets', 'v4', credentials=creds)
     return(
@@ -64,22 +63,22 @@ def login():
     )
 
 def find_folder(drive_service):
-    response = drive_service.files().list(  q="mimeType='application/vnd.google-apps.folder' and parents in '{}' and name contains '{}'  and trashed=False".format(CASES_DRIVE,args.case),
+    response = drive_service.files().list(  q="mimeType='application/vnd.google-apps.folder' and name contains '{}*'  and trashed=False".format(args.case),
                                             spaces='drive',
                                             fields='nextPageToken, files(id, name, parents)',
                                             supportsAllDrives=True, 
                                             includeItemsFromAllDrives=True,
                                           ).execute()
     folders = response.get('files', [])
-    if len(folders) == 1 and folders[0].get('name').startswith(args.case):
+    if len(folders) == 1:
+        print("Found parent folder '{}'".format(folders[0].get("name")))
         return folders[0].get("id")
+    elif len(folders) == 0 :
+        sys.exit("ERROR: Searching for a folder starting with '{}' returned 0 results".format(args.case))
     else:
-        if len(folders) == 0 :
-            sys.exit("ERROR: Searching for a folder with '{}' in the name returned 0 results".format(args.case))
-        else:
-            sys.exit("ERROR: Searching for a folder with '{}' in the name returned {} results or the return folder does not start with the case number. First folder is {}".format(
-                args.case, len(folders), folders[0].get('name'))
-            )
+        sys.exit("ERROR: Searching for a folder starting with '{}' returned {} results. First folder is {}".format(
+            args.case, len(folders), folders[0].get('name'))
+        )
 
 def create_target_folder(drive_service, root_folder, folder_name):
     response = drive_service.files().list(  q="mimeType='application/vnd.google-apps.folder' and parents in '{}' and name='{}' and trashed=False".format(root_folder,folder_name),
@@ -331,11 +330,6 @@ if __name__ == '__main__':
         parser.add_argument('--case', '-c', type=str, required=True, metavar="YYYY-NNNNN", help="DIVD case number, without 'DIVD-' e.g. DIVD-2020-00001 is 2020-00001")
         parser.add_argument('--folder', '-f', type=str, required=True, metavar="FOLDER_NAME", help="Subfolder to put evidence in (will be craeted if it doesn't exisit)")
 
-    if scan or upload:
-        targetgroup = parser.add_mutually_exclusive_group()
-        targetgroup.add_argument('--targets', '-t', type=str, required=False, metavar="FILE", help="File containing the targets to scan")
-        targetgroup.add_argument('--glob', '-g', type=str, required=False, metavar="*.gif", default="*.gif", help="Filesystem pattern for evidence files, used when --targets is not specified and we are not scanning")
-
     if scan:
         parser.add_argument('--scanner', '-s', type=str, required=True, metavar="SCRIPT", help="File containing the scan script")
         parser.add_argument('--argument', '-a', type=str, required=False, metavar="PYTHON_STRING", default="{}", help="Argument string to the scan script \{\} will be replaced by the target")
@@ -350,6 +344,10 @@ if __name__ == '__main__':
     if google:
         parser.add_argument('--no-browser', '-n', action="store_true", help="System does not have a local browser to authenticate to google, use alternative flow")
         parser.add_argument('--pickle', '-p', type=str, default='./token.pickle', metavar="PATH", help="Location of the token.pickle file, willb e created if not exisit")
+
+    if scan or upload:
+        parser.add_argument('--targets', '-t', type=str, required=False, metavar="TARGETS_FILE", help="File containing the targets to scan")
+        parser.add_argument('file', metavar="FILE", type=str, nargs="*", help="Evidence files to be uploaded, used when --targets is not specified but we are uploading")
 
     args = parser.parse_args()
 
@@ -380,6 +378,20 @@ if __name__ == '__main__':
         if not "targets" in args or not args.targets:
             parser.print_help()
             sys.exit("\nevidence_uploader.py: error: --targets is mandatory when scanning")
+
+    if upload and not ("targets" in args or "files" in args):
+        parser.print_help()
+        sys.exit("\nevidence_uploader.py: error: when uploading you must specify --targets or files to upload")
+
+    if "target" in args and "files" in args:
+        parser.print_help()
+        sys.exit("\nevidence_uploader.py: error: you cannot use the --targets and specify specific files to upload at the same time")
+
+
+    if "files" in args:
+        for file in args.files:
+            if not file_exists(file):
+                sys.exit("You specified that file '{}' should be uploaded, but it does not exist".format(file))
 
     if google :
         services = login()

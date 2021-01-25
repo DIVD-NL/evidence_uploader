@@ -36,7 +36,7 @@ optional arguments:
                         File containing the targets to scan
   --glob *.gif, -g *.gif
                         Filesystem pattern for evidence files, used when
-                        --targets is not specified and we are not scanning
+                        --targets is not specified but we are uploading
   --scanner SCRIPT, -s SCRIPT
                         File containing the scan script
   --argument PYTHON_STRING, -a PYTHON_STRING
@@ -58,5 +58,6 @@ optional arguments:
 In order to use this tool you need:
 * A Google account in the DIVD organisation
 * Create credentials.json using this page: https://developers.google.com/drive/api/v3/quickstart/python (make sure you are logged into you divd.nl account)
-* Alternatively, ask Frank from credentials and a whitlisting
+* Alternatively, ask Frank for credentials and a whitlisting
+* Enable Google Sheets on your credentials, see: https://support.google.com/googleapi/answer/6158841?hl=en
 * Certain packages (a lot if you want gifs as well), see prep-ubuntu.sh to give you an idea
