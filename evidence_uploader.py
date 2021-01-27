@@ -137,7 +137,7 @@ def create_sheet(services, target_folder):
 
         data = {
             'range': 'A1',
-            'values' : [['IP', 'Timestamp', 'Match', 'txt', 'gif', 'other']],
+            'values' : [['IP', 'Timestamp', 'Match', 'txt_url', 'gif_url', 'file_url']],
         }
         result = ss.values().append(    spreadsheetId=sheet_id,
                                         range='A1',
@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
     if scan or upload:
         parser.add_argument('--targets', '-t', type=str, required=False, metavar="TARGETS_FILE", help="File containing the targets to scan")
-        parser.add_argument('file', metavar="FILE", type=str, nargs="*", help="Evidence files to be uploaded, used when --targets is not specified but we are uploading")
+        parser.add_argument('files', metavar="FILE", type=str, nargs="*", help="Evidence files to be uploaded, used when --targets is not specified but we are uploading")
 
     args = parser.parse_args()
 
@@ -379,11 +379,12 @@ if __name__ == '__main__':
             parser.print_help()
             sys.exit("\nevidence_uploader.py: error: --targets is mandatory when scanning")
 
-    if upload and not ("targets" in args or "files" in args):
-        parser.print_help()
-        sys.exit("\nevidence_uploader.py: error: when uploading you must specify --targets or files to upload")
+    if upload:
+        if (not "targets" in args or not args.targets) and (not "files" in args or len(args.files) == 0):
+            parser.print_help()
+            sys.exit("\nevidence_uploader.py: error: when uploading you must specify --targets or specific files to upload")
 
-    if "target" in args and "files" in args:
+    if "target" in args and "files" in args and len(args.files) > 0:
         parser.print_help()
         sys.exit("\nevidence_uploader.py: error: you cannot use the --targets and specify specific files to upload at the same time")
 
@@ -410,9 +411,7 @@ if __name__ == '__main__':
             targets=targetf.readlines()
             targetf.close
         else:
-            print("Looking for files...")
-            targets=glob.glob(args.glob)
-            print("{} files found".format(len(targets)))
+            targets=args.files
 
         # Scan and/or upload each target
         for target in targets:
