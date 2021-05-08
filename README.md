@@ -23,6 +23,24 @@ optional arguments:
                         Name of the subfolder to store results
 ```
 
+You also need to create a JOSN configuration file:
+```json
+{
+    "case" : "1999-99999",
+    "scanner": "./scan.sh",
+    "targets": "targets.txt",
+    "batch": 10000,
+    "output_extension": "*"
+}
+```
+
+The files have the following meaning:
+* case - The DIVD case number
+* scanner - The scan script
+* targets - files that holds the targets
+* batch - The number of lines per scanning job
+* Output extension - The filesystem pattern for the extension of the output files to upload. E.g. set this to `*.xml` to only upload XML files
+
 In order to use this tool you need:
 * A Google account in the DIVD organisation
 * Create credentials.json using this page: https://developers.google.com/drive/api/v3/quickstart/python (make sure you are logged into you divd.nl account)
