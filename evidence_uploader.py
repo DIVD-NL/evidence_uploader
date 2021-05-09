@@ -315,7 +315,6 @@ if __name__ == '__main__':
     parser.add_argument('--pickle', '-p', type=str, default='./token.pickle', metavar="PATH", help="Location of the token.pickle file, willb e created if not exisit")
     parser.add_argument('--max', '-m', type=int, default=0, metavar="N", help="Process a maximum of N batches, 0 or lower means no limit")
 
-
     if setup:
         parser.add_argument('--folder', '-f', type=str, required=True, metavar="FOLDER_NAME", help="Name of the subfolder to store results")
 
