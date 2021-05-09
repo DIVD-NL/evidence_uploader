@@ -194,7 +194,7 @@ def claim_file(services, sheet, my_id, filecount):
             return None
 
         claim = random.choice(free)
-        print("Claiming file '{}'".format(result['values'][claim][0]))
+        print("Claiming file '{}'".format(result['values'][claim-1][0]))
         data = {
             'range' : "B{}".format(claim),
             'values' : [ [ my_id ] ]
@@ -313,6 +313,7 @@ if __name__ == '__main__':
     parser.add_argument('--config', '-c', type=str, default='./config.json', metavar="PATH", help="Location of the JSON configuration file")
     parser.add_argument('--no-browser', '-n', action="store_true", help="System does not have a local browser to authenticate to google, use alternative flow")
     parser.add_argument('--pickle', '-p', type=str, default='./token.pickle', metavar="PATH", help="Location of the token.pickle file, willb e created if not exisit")
+    parser.add_argument('--max', '-m', type=int, default=0, metavar="N", help="Process a maximum of N batches, 0 or lower means no limit")
 
     if setup:
         parser.add_argument('--folder', '-f', type=str, required=True, metavar="FOLDER_NAME", help="Name of the subfolder to store results")
@@ -359,10 +360,15 @@ if __name__ == '__main__':
 
     if scan:
         input_file = claim_file(services,sheet_id,my_id, len(files))
+        count = 0
         while input_file:
             print(input_file)
             output_file = input_file.replace("targets","output")
             execute("{} {} {}".format(config['scanner'], input_file, output_file))
             upload_files(services, target_folder, "{}{}".format(output_file,config['output_extension']))
             file_done(services, sheet_id, input_file, len(files))
-            input_file = claim_file(services,sheet_id,my_id, len(files))
+            count = count + 1
+            if args.max > 0 and count < max:
+                input_file = claim_file(services,sheet_id,my_id, len(files))
+            else:
+                input_file = None
