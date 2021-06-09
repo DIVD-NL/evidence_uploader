@@ -23,7 +23,7 @@ optional arguments:
                         Name of the subfolder to store results
 ```
 
-You also need to create a JOSN configuration file:
+You also need to create a JSON configuration file:
 ```json
 {
     "case" : "1999-99999",
@@ -35,7 +35,7 @@ You also need to create a JOSN configuration file:
 ```
 
 The files have the following meaning:
-* case - The DIVD case number
+* case - The DIVD case number, this needs to be an existing folder in Google Drive
 * scanner - The scan script
 * targets - files that holds the targets
 * batch - The number of lines per scanning job
@@ -44,6 +44,9 @@ The files have the following meaning:
 In order to use this tool you need:
 * A Google account in the DIVD organisation
 * Create credentials.json using this page: https://developers.google.com/drive/api/v3/quickstart/python (make sure you are logged into you divd.nl account)
+    * Create a project and OAuth client ID using this page: https://console.cloud.google.com/projectselector2/apis/credentials
+    * Select application type Desktop App
 * Alternatively, ask Frank for credentials and a whitlisting
 * Enable Google Sheets on your credentials, see: https://support.google.com/googleapi/answer/6158841?hl=en
 * Certain os and Python packages, see prep-ubuntu.sh to give you an idea
+    * `pip3 install google-api-python-client google-auth-httplib2 google-auth-oauthlib`
