@@ -35,7 +35,7 @@ You also need to create a JSON configuration file:
 ```
 
 The files have the following meaning:
-* case - The DIVD case number, this needs to be an existing folder in Google Drive
+* case - The DIVD case number, this needs to be an existing case folder in Google Drive
 * scanner - The scan script
 * targets - files that holds the targets
 * batch - The number of lines per scanning job
